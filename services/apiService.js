@@ -8,7 +8,7 @@ export const getRequest = async (path, callback,errorCallBack) => {
   
   
 
- AsyncStorage.getItem("userToken").then(token=>{
+ AsyncStorage.getItem("Token").then(token=>{
    console.log(path);
 
     fetch(SERVER_URL + path, {
@@ -28,27 +28,10 @@ export const getRequest = async (path, callback,errorCallBack) => {
 
 }
 
-export const getRequestWithoutToken = async (path, callback,errorCallBack) => {
-  
-    fetch(SERVER_URL + path, {
-      })
-        .then(response => response.json())
-        .then(responseData => {
-          callback(responseData);
-          
-        }) .catch(err => { 
-          errorCallBack(err);
-          
-        })
-   
-   }
-
-
-
 
 export const postRequest = async (path, data,callback) => {
   console.log("post " +path+ "  "+JSON.stringify(data));
-  AsyncStorage.getItem("userToken").then(token=>{
+  AsyncStorage.getItem("Token").then(token=>{
     
      fetch(SERVER_URL + path, {
        method:'POST',
