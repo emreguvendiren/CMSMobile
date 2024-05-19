@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Home from './pages/Home';
 import LoginScreen from './pages/LoginScreen';
 import { View } from 'react-native';
+import Tables from './pages/Tables';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -35,7 +36,7 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name="Ana Sayfa" component={Home} />
-      <Tab.Screen name="Masalar" component={Home} />
+      <Tab.Screen name="Masalar" component={Tables} />
       <Tab.Screen name="Qr Okut" component={Home} />
       <Tab.Screen name="Profilim" component={Home} />
     </Tab.Navigator>

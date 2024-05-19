@@ -7,17 +7,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const getRequest = async (path, callback,errorCallBack) => {
   
   
+  const token = await AsyncStorage.getItem("Token");
 
  AsyncStorage.getItem("Token").then(token=>{
    console.log(path);
 
     fetch(SERVER_URL + path, {
-      headers: { Authorization: token }
+      headers: { Authorization:"Bearer " + token}
     })
       .then(response => response.json())
       .then(responseData => {
         callback(responseData);
-        
+
       }) .catch(err => { 
         errorCallBack(err);
         //sessionStorage.setItem("jwt",null);
