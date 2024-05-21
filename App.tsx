@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import LoginScreen from './pages/LoginScreen';
 import { View } from 'react-native';
 import Tables from './pages/Tables';
+import Menu from './pages/Menu';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -23,8 +24,8 @@ function TabNavigator() {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Masalar') {
             iconName = focused ? 'table-furniture' : 'table-furniture';
-          } else if (route.name === 'Qr Okut') {
-            iconName = focused ? 'qrcode' : 'qrcode';
+          } else if (route.name === 'Menu') {
+            iconName = focused ? 'basket' : 'basket';
           } else if (route.name === 'Profilim') {
             iconName = focused ? 'account' : 'account';
           }
@@ -37,7 +38,7 @@ function TabNavigator() {
     >
       <Tab.Screen name="Ana Sayfa" component={Home} />
       <Tab.Screen name="Masalar" component={Tables} />
-      <Tab.Screen name="Qr Okut" component={Home} />
+      <Tab.Screen name="Menu" component={Menu} />
       <Tab.Screen name="Profilim" component={Home} />
     </Tab.Navigator>
   );
