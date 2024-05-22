@@ -50,6 +50,7 @@ const Tables = () => {
                 keyExtractor={(item) => item.id.toString()}
                 numColumns={3}
                 contentContainerStyle={styles.list}
+              
             />
 
             <Modal

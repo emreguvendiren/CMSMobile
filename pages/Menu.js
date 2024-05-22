@@ -84,7 +84,7 @@ const Menu = () =>{
 };
 
 const cardWidth = (windowWidth - 40) / 1 - 20;
-const horizontalSpacing = 10; // Yatay boşluk
+const horizontalSpacing = 10;
 
 const styles = StyleSheet.create({
     container: {
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
     },
     list: {
-        paddingHorizontal: 10, // Sağdan ve soldan eşit uzaklık için
+        paddingHorizontal: 10,
     },
     menuItem: {
         marginHorizontal: 20,
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     card: {
         width: cardWidth,
         marginVertical: 10,
-        marginRight: horizontalSpacing, // Sağdan boşluk eklendi
+        marginRight: horizontalSpacing,
         borderWidth: 1,
         borderColor: '#ddd',
         borderRadius: 10,
@@ -137,15 +137,15 @@ const styles = StyleSheet.create({
         marginTop: 2,
         fontSize: 12,
     },
-    contentStyle: {
-        flexDirection: 'row',
-        alignItems: 'flex-start', // İçeriği üstten hizalayacak
-    },
     textContainer: {
         marginLeft: 15,
         flex: 1,
         marginTop: -10, // Metni biraz yukarı kaydırmak için
     },
+    contentStyle: {
+        flexDirection: 'row',
+        alignItems: 'flex-start', // İçeriği üstten hizalayacak
+    }
 });
 
 export default Menu;
