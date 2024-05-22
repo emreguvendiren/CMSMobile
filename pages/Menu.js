@@ -1,47 +1,43 @@
 import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { Dimensions, FlatList, StyleSheet, View ,Image, TouchableHighlight, TouchableOpacity} from "react-native";
+import { Dimensions, FlatList, StyleSheet, View, Image, TouchableOpacity } from "react-native";
 import { Card, Paragraph, Text, Title } from "react-native-paper";
 import { getRequest } from "../services/apiService";
-import { CardMedia } from "@mui/material";
-
 
 const windowWidth = Dimensions.get('window').width;
-const Menu = () =>{
+
+const Menu = () => {
     const isFocused = useIsFocused();
-    const [products,setProducts] = useState([]);
+    const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [selectedCategory,setSelectedCategory] = useState();
+    const [selectedCategory, setSelectedCategory] = useState();
 
-    useEffect(()=>{
-        getRequest("category/getAllCategory",(responseData)=>{
-            if(responseData.status===200){
-
+    useEffect(() => {
+        getRequest("category/getAllCategory", (responseData) => {
+            if (responseData.status === 200) {
                 setCategories(responseData.result);
-                setSelectedCategory(responseData.result[0])
-                getProductByCategory(responseData.result[0])
+                setSelectedCategory(responseData.result[0]);
+                getProductByCategory(responseData.result[0]);
             }
         });
-    },[isFocused]);
+    }, [isFocused]);
 
-    const getProductByCategory =async (e) =>{
+    const getProductByCategory = async (category) => {
+        setSelectedCategory(category);
 
-        setSelectedCategory(e)
-
-        getRequest("product/getProductsByCategory?categoryId="+ e.id,(responseData)=>{
-            if(responseData.status === 200){
-                setProducts(responseData.result)
+        getRequest("product/getProductsByCategory?categoryId=" + category.id, (responseData) => {
+            if (responseData.status === 200) {
+                setProducts(responseData.result);
             }
-        })
-    }
-
+        });
+    };
 
     const renderProductItem = ({ item }) => (
         <Card style={styles.card}>
             <Card.Content style={styles.contentStyle}>
                 <Image
                     source={{ uri: item.imageUrl }}
-                    style={{ width: 100, height: 100,borderRadius:20 }}
+                    style={{ width: 100, height: 100, borderRadius: 20 }}
                     resizeMode={"cover"}
                 />
                 <View style={styles.textContainer}>
@@ -52,35 +48,34 @@ const Menu = () =>{
             </Card.Content>
         </Card>
     );
-    return(
+
+    return (
         <View style={styles.container}>
-             <View style={styles.menu}>
+            <View style={styles.menu}>
                 <FlatList
-                horizontal
-                data={categories}
-                renderItem={({ item }) => (
-                    <TouchableOpacity onPress={()=>{getProductByCategory(item)}}>
-                    <Text style={[
-                        styles.menuItem,
-                        item === selectedCategory && styles.selectedMenuItem
-                    ]}>{item.name}</Text>
-                    </TouchableOpacity>
-                )}
-                keyExtractor={(item) => item}
+                    horizontal
+                    data={categories}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity key={item.id} onPress={() => getProductByCategory(item)}>
+                            <Text style={[
+                                styles.menuItem,
+                                item === selectedCategory && styles.selectedMenuItem
+                            ]}>{item.name}</Text>
+                        </TouchableOpacity>
+                    )}
+                    keyExtractor={(item) => item.id.toString()}
                 />
             </View>
-           <View style={{marginTop:15}}>
-           <FlatList
-                data={products}
-                renderItem={renderProductItem}
-                keyExtractor={(item) => item.id.toString()}
-                
-                contentContainerStyle={styles.list}
-            />
-           </View>
+            <View style={{ marginTop: 15 }}>
+                <FlatList
+                    data={products}
+                    renderItem={renderProductItem}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.list}
+                />
+            </View>
         </View>
     );
-
 };
 
 const cardWidth = (windowWidth - 40) / 1 - 20;
@@ -100,14 +95,13 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         fontSize: 16,
         color: '#333',
-        fontWeight:"bold"
-        
-      },
-      selectedMenuItem: {
+        fontWeight: "bold"
+    },
+    selectedMenuItem: {
         color: '#FF6347',
         borderBottomWidth: 2,
         borderBottomColor: '#FF6347',
-      },
+    },
     card: {
         width: cardWidth,
         marginVertical: 10,
@@ -126,13 +120,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     menu: {
-
         flexDirection: 'row',
         backgroundColor: '#f5f5f5',
         padding: 10,
-        borderBottomWidth:1,
-        borderBottomColor:"#C7B7A3"
-      },
+        borderBottomWidth: 1,
+        borderBottomColor: "#C7B7A3"
+    },
     price: {
         marginTop: 2,
         fontSize: 12,

@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Button, TouchableHighlight } from 'react-native
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getRequest } from '../services/apiService';
 import { Card, Paragraph, Title } from 'react-native-paper';
+import { Typography } from '@mui/material';
 
 
 const windowWidth = Dimensions.get('window').width;
@@ -27,6 +28,7 @@ const TableDetail = ({ route, navigation }) => {
                 setCategories(responseData.result);
                 setSelectedCategory(responseData.result[0])
                 getProductByCategory(responseData.result[0])
+                
             }
         });
     },[]);
@@ -38,6 +40,9 @@ const TableDetail = ({ route, navigation }) => {
         getRequest("product/getProductsByCategory?categoryId="+ e.id,(responseData)=>{
             if(responseData.status === 200){
                 setProducts(responseData.result)
+            }
+            else{
+                setProducts([])
             }
         })
     }
@@ -94,13 +99,20 @@ const TableDetail = ({ route, navigation }) => {
                                 keyExtractor={(item) => item.id.toString()}
                             />
                         </View>
-                        <View style={{ marginTop: 15 }}>
-                            <FlatList
-                                data={products}
-                                renderItem={renderProductItem}
-                                keyExtractor={(item) => item.id.toString()}
-                                contentContainerStyle={styles.list}
-                            />
+                        <View style={{ marginTop: 15 ,flex:0.9}}>
+                            {
+                                products.length>0&&
+                                    <FlatList
+                                    data={products}
+                                    renderItem={renderProductItem}
+                                    keyExtractor={(item) => item.id.toString()}
+                                    contentContainerStyle={styles.list}
+                                />
+                            }
+                            {
+                                products.length===0&&
+                                    <Text>Ürün Bulunamadı</Text>
+                            }
                         </View>
                         <TouchableOpacity style={styles.closeButtonContainer} onPress={() => setModalVisible(false)}>
                             <Text style={styles.closeButtonText}>Kapat</Text>
@@ -194,7 +206,7 @@ const styles = StyleSheet.create({
     },
     menu: {
         flexDirection: 'row',
-        backgroundColor: '#f5f5f5',
+        //backgroundColor: '#f5f5f5',
         padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: "#C7B7A3"
