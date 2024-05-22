@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Modal, Button, Dimensions } from "react-native";
 import { Card, Title, Paragraph } from "react-native-paper";
 import { getRequest } from "../services/apiService";
-import { useIsFocused } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -11,6 +11,7 @@ const Tables = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedTable, setSelectedTable] = useState(null);
     const isFocused = useIsFocused();
+    const navigation = useNavigation();
 
     useEffect(() => {
         fetchTables();
@@ -25,8 +26,9 @@ const Tables = () => {
     };
 
     const handleTableClick = (table) => {
-        setSelectedTable(table);
-        setModalVisible(true);
+        //setSelectedTable(table);
+        //setModalVisible(true);
+        navigation.navigate('TableDetail',{tableId:table.id})
     };
 
     const renderTableItem = ({ item }) => (

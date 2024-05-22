@@ -9,6 +9,7 @@ import LoginScreen from './pages/LoginScreen';
 import { View } from 'react-native';
 import Tables from './pages/Tables';
 import Menu from './pages/Menu';
+import TableDetail from './pages/TableDetail';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -50,6 +51,7 @@ function App(): React.JSX.Element {
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name="TableDetail" component={TableDetail} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
     
