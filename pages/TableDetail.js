@@ -3,12 +3,14 @@ import { Dimensions, FlatList, Image, Modal, TouchableOpacity } from 'react-nati
 import { View, Text, StyleSheet, Button, TouchableHighlight } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getRequest } from '../services/apiService';
-import { Card, Paragraph, Title } from 'react-native-paper';
+import { Card, DataTable, Paragraph, Title } from 'react-native-paper';
 import { Typography } from '@mui/material';
 import { useScrollToTop } from '@react-navigation/native';
 
 
 const windowWidth = Dimensions.get('window').width;
+
+
 
 const TableDetail = ({ route, navigation }) => {
     const { tableId } = route.params;
@@ -16,18 +18,31 @@ const TableDetail = ({ route, navigation }) => {
     const [products,setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory,setSelectedCategory] = useState();
-
+    const [orders,setOrders] = useState([]);
     
-    const [count,setCount] = useState(0);
 
-    const increment =()=>{
-        setCount(count+1);
+    const increment =(item)=>{
+        
+        const newData = products.map(row=>{
+            if(row.id===item.id){
+                return {...row,quantity:row.quantity+1};
+            }
+            return row;
+        })
+        setProducts(newData);
     };
 
-    const decrement =()=>{
-        if(count>0){
-        setCount(count-1);
-        }
+    const decrement =(item)=>{
+        
+        const newData = products.map(row=>{
+            if(row.id===item.id){
+                if(item.quantity>0){
+                    return {...row,quantity:row.quantity-1};
+                }
+            }
+            return row;
+        })
+        setProducts(newData);
     };
 
     
@@ -54,12 +69,22 @@ const TableDetail = ({ route, navigation }) => {
 
         getRequest("product/getProductsByCategory?categoryId="+ e.id,(responseData)=>{
             if(responseData.status === 200){
-                setProducts(responseData.result)
+                const newData = responseData.result.map(item=>{return {...item,quantity:0}});
+                setProducts(newData);
             }
             else{
                 setProducts([])
             }
         })
+    }
+
+    const handleAddButton = async()=>{
+        let data = products.filter(x=>x.quantity !=0);
+        data = data.map(row=>{
+            return {...row,totalPrice:row.quantity*row.price};
+        })
+        setOrders(data);
+        setModalVisible(false);
     }
 
     const renderProductItem = ({ item }) => (
@@ -77,13 +102,13 @@ const TableDetail = ({ route, navigation }) => {
                 </View>
 
                 <View style={styles.containerDecInc}>
-                    <TouchableOpacity onPress={increment} style={styles.buttonDecInc}>
+                    <TouchableOpacity onPress={()=>{increment(item)}} style={styles.buttonDecInc}>
                         <Icon name="plus-thick" size={23} color={'orange'} />
                     </TouchableOpacity>
                     <View style={styles.countContainer}>
-                        <Text style={styles.countText}>{count}</Text>
+                        <Text style={styles.countText}>{item.quantity}</Text>
                     </View>
-                    <TouchableOpacity onPress={decrement} style={styles.buttonDecInc}>
+                    <TouchableOpacity onPress={()=>{decrement(item)}} style={styles.buttonDecInc}>
                         <Icon name="minus-thick" size={23} color={'orange'} />
                     </TouchableOpacity>
                 </View>
@@ -96,8 +121,30 @@ const TableDetail = ({ route, navigation }) => {
         <View style={{flex:1}}>
             <View style={styles.container}>
             <Text style={styles.title}>Masa ID: {tableId}</Text>
-            <Button title="Geri Dön" onPress={() => navigation.goBack()} />
+            {
+            <DataTable >
+            <DataTable.Header>
+                <DataTable.Title>Ürün Adı</DataTable.Title>
+                <DataTable.Title>Fiyat</DataTable.Title>
+                <DataTable.Title>Adet</DataTable.Title>
+                <DataTable.Title>Toplam Fiyat</DataTable.Title>
+            </DataTable.Header>
+            {
+                orders.length>0&&
+                    orders.map((item) => (
+                        <DataTable.Row key={item.id}>
+                            <DataTable.Cell>{item.name}</DataTable.Cell>
+                            <DataTable.Cell>{item.price}</DataTable.Cell>
+                            <DataTable.Cell >{item.quantity}</DataTable.Cell>
+                            <DataTable.Cell >{item.totalPrice}</DataTable.Cell>
+                        </DataTable.Row>
+                    ))
+            }
+
+        </DataTable>
+        }
         </View>
+        
 
             <TouchableOpacity onPress={handleAddProduct} style={styles.addProduct}>
                 <Icon name="order-bool-ascending" size={28} color={'red'} />
@@ -127,7 +174,7 @@ const TableDetail = ({ route, navigation }) => {
                                 keyExtractor={(item) => item.id.toString()}
                             />
                         </View>
-                        <View style={{ marginTop: 15 ,flex:0.9}}>
+                        <View style={{ marginTop: 15 ,flex:1}}>
                             {
                                 products.length>0&&
                                     <FlatList
@@ -142,6 +189,9 @@ const TableDetail = ({ route, navigation }) => {
                                     <Text>Ürün Bulunamadı</Text>
                             }
                         </View>
+                        <TouchableOpacity style={styles.closeButtonContainer} onPress={handleAddButton}>
+                            <Text style={styles.closeButtonText}>Ekle</Text>
+                        </TouchableOpacity>
                         <TouchableOpacity style={styles.closeButtonContainer} onPress={() => setModalVisible(false)}>
                             <Text style={styles.closeButtonText}>Kapat</Text>
                         </TouchableOpacity>
@@ -159,7 +209,7 @@ const horizontalSpacing = 10;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 0.98,
+       // flex: 0.2,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -268,11 +318,11 @@ const styles = StyleSheet.create({
     },
     closeButtonContainer: {
         width: '100%',
-        paddingVertical: 15,
+        paddingVertical: 7,
         alignItems: 'center',
         borderTopWidth: 1,
         borderTopColor: '#ddd',
-        position: 'absolute',
+        position: 'relative',
         bottom: 0,
     },
     closeButtonText: {
