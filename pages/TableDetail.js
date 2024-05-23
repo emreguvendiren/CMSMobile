@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getRequest } from '../services/apiService';
 import { Card, Paragraph, Title } from 'react-native-paper';
 import { Typography } from '@mui/material';
+import { useScrollToTop } from '@react-navigation/native';
 
 
 const windowWidth = Dimensions.get('window').width;
@@ -16,6 +17,20 @@ const TableDetail = ({ route, navigation }) => {
     const [categories, setCategories] = useState([]);
     const [selectedCategory,setSelectedCategory] = useState();
 
+    
+    const [count,setCount] = useState(0);
+
+    const increment =()=>{
+        setCount(count+1);
+    };
+
+    const decrement =()=>{
+        if(count>0){
+        setCount(count-1);
+        }
+    };
+
+    
 
     const handleAddProduct = async()=>{
         setModalVisible(true)
@@ -52,14 +67,27 @@ const TableDetail = ({ route, navigation }) => {
             <Card.Content style={styles.contentStyle}>
                 <Image
                     source={{ uri: item.imageUrl }}
-                    style={{ width: 100, height: 100,borderRadius:20 }}
+                    style={{ width: 80, height: 80,borderRadius:20 }}
                     resizeMode={"cover"}
                 />
                 <View style={styles.textContainer}>
                     <Title style={styles.title}>{item.name}</Title>
                     <Paragraph style={styles.price}>Fiyat: {item.price} TL</Paragraph>
-                    <Paragraph style={styles.price}>{item.description}</Paragraph>
+                    <Paragraph style={styles.description}>{item.description} </Paragraph>
                 </View>
+
+                <View style={styles.containerDecInc}>
+                    <TouchableOpacity onPress={increment} style={styles.buttonDecInc}>
+                        <Icon name="plus-thick" size={23} color={'orange'} />
+                    </TouchableOpacity>
+                    <View style={styles.countContainer}>
+                        <Text style={styles.countText}>{count}</Text>
+                    </View>
+                    <TouchableOpacity onPress={decrement} style={styles.buttonDecInc}>
+                        <Icon name="minus-thick" size={23} color={'orange'} />
+                    </TouchableOpacity>
+                </View>
+
             </Card.Content>
         </Card>
     );
@@ -135,6 +163,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    containerDecInc: {
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 25,
+        padding: 5,
+        borderWidth: 0.7,
+        borderColor: '#ddd',
+        
+      },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -215,6 +252,11 @@ const styles = StyleSheet.create({
         marginTop: 2,
         fontSize: 12,
     },
+    description:{
+        marginTop: 2,
+        fontSize: 12,
+        paddingRight:40
+    },
     textContainer: {
         marginLeft: 15,
         flex: 1,
@@ -238,5 +280,31 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FF6347',
     },
+    addProductToOrder:{
+        position: 'absolute',
+        bottom: 36,
+        right: 10,
+        borderRadius: 10,
+        backgroundColor: '#f0ad4e',
+        width: "15%",
+        height: '60%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buttonDecInc: {
+        padding: 3,
+      },
+      countContainer: {
+        marginHorizontal: 10,
+        backgroundColor: '#ffecd2',
+        borderRadius: 20,
+        paddingVertical: 2,
+        paddingHorizontal: 3,
+      },
+      countText: {
+        fontSize: 14,
+        color: 'orange',
+        textAlign: 'center',
+      }
 });
 export default TableDetail;
