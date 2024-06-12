@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, Image, Modal, TouchableOpacity } from 'react-native';
+import { Dimensions, FlatList, Image, Modal, ToastAndroid, TouchableOpacity } from 'react-native';
 import { View, Text, StyleSheet, Button, TouchableHighlight } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getRequest } from '../services/apiService';
+import { getRequest, postRequest } from '../services/apiService';
 import { Card, DataTable, Paragraph, Title } from 'react-native-paper';
 import { Typography } from '@mui/material';
 import { useScrollToTop } from '@react-navigation/native';
@@ -13,6 +13,14 @@ const windowWidth = Dimensions.get('window').width;
 
 
 const TableDetail = ({ route, navigation }) => {
+
+    const defaultValue = {
+        tableId:null,
+        productId:null,
+        totalPrice:null,
+        quantity:null
+    }
+
     const { tableId } = route.params;
     const [modalVisible, setModalVisible] = useState(false);
     const [products,setProducts] = useState([]);
@@ -118,6 +126,28 @@ const TableDetail = ({ route, navigation }) => {
         })
     }
 
+    const handleAddOrder = async()=>{
+        if(orders.length===0){
+            ToastAndroid.show("Lutfen Urun Ekleyiniz",ToastAndroid.LONG)
+        }
+        else{
+            const data = []
+            orders.map(item=>{
+                data.push( {...defaultValue,totalPrice:item.totalPrice,quantity:item.quantity,tableId:tableId,productId:item.id});
+            })
+            console.log(data)
+            postRequest("orders/create",data,(responseData)=>{
+                if(responseData.status===200){
+
+                }
+                else{
+                    
+                }
+                ToastAndroid.show(responseData.message,ToastAndroid.LONG)
+            })
+        }
+    }
+
     const handleAddButton = async()=>{
         let data = selectedProducts.filter(x=>x.quantity !=0);
         data = data.map(row=>{
@@ -193,6 +223,13 @@ const TableDetail = ({ route, navigation }) => {
 
         </DataTable>
         }
+
+        <View>
+        <TouchableOpacity style={styles.addNewOrder} onPress={handleAddOrder}>
+                            <Text style={styles.closeButtonText}>Siparis Olustur</Text>
+                        </TouchableOpacity>
+        </View>
+
         </View>
         
 
@@ -365,6 +402,19 @@ const styles = StyleSheet.create({
         color: '#FF6347',
         borderBottomWidth: 2,
         borderBottomColor: '#FF6347',
+    },
+
+  
+
+    addNewOrder: {
+        
+        width: '100%',
+        paddingVertical: 7,
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#ddd',
+        position: 'relative',
+        bottom: 0,
     },
     closeButtonContainer: {
         width: '100%',
