@@ -29,7 +29,25 @@ const TableDetail = ({ route, navigation }) => {
             }
             return row;
         })
-        setSelectedProducts([...selectedProducts,...newData]);
+        
+        const hasItem  = selectedProducts.findIndex(row=>row.id===item.id);
+
+        if(hasItem>-1){
+            const newProduct = selectedProducts.map(rowItem=>{
+                if(rowItem.id==item.id){
+                    return {...rowItem,quantity:item.quantity+1}
+                }
+                return rowItem;
+
+            })
+            setSelectedProducts(newProduct);
+        }
+        else{
+            
+            const newItem = {...item,quantity:1};
+            setSelectedProducts([...selectedProducts,newItem])
+        }
+
         setProducts(newData);
     };
 
@@ -43,8 +61,16 @@ const TableDetail = ({ route, navigation }) => {
             }
             return row;
         })
+        const newProduct = selectedProducts.map(rowItem=>{
+            if(rowItem.id==item.id){
+                if(item.quantity>0){
+                    return {...rowItem,quantity:item.quantity-1}
+                }
+            }
+            return rowItem;
 
-        setSelectedProducts([...selectedProducts,...newData.filter(row=>row.quantity>0)]);
+        })
+        setSelectedProducts(newProduct);
         setProducts(newData);
     };
 
@@ -93,13 +119,20 @@ const TableDetail = ({ route, navigation }) => {
     }
 
     const handleAddButton = async()=>{
-        // let data = products.filter(x=>x.quantity !=0);
-        // data = data.map(row=>{
-        //     return {...row,totalPrice:row.quantity*row.price};
+        let data = selectedProducts.filter(x=>x.quantity !=0);
+        data = data.map(row=>{
+            return {...row,totalPrice:row.quantity*row.price};
+        })
+        setOrders(data);
+        setModalVisible(false);
+        // const newData = {
+        //     id:null,
+        //     quantity:null
+        // }
+        // const asd = selectedProducts.map(item=>{
+        //     return {...newData,id:item.id,quantity:item.quantity}
         // })
-        // setOrders(data);
-        // setModalVisible(false);
-        console.log(selectedProducts)
+        // console.log(asd)
     }
 
     const renderProductItem = ({ item }) => (
