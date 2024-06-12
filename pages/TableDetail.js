@@ -19,7 +19,7 @@ const TableDetail = ({ route, navigation }) => {
     const [categories, setCategories] = useState([]);
     const [selectedCategory,setSelectedCategory] = useState();
     const [orders,setOrders] = useState([]);
-    
+    const [selectedProducts,setSelectedProducts] = useState([]);
 
     const increment =(item)=>{
         
@@ -29,6 +29,7 @@ const TableDetail = ({ route, navigation }) => {
             }
             return row;
         })
+        setSelectedProducts([...selectedProducts,...newData]);
         setProducts(newData);
     };
 
@@ -42,6 +43,8 @@ const TableDetail = ({ route, navigation }) => {
             }
             return row;
         })
+
+        setSelectedProducts([...selectedProducts,...newData.filter(row=>row.quantity>0)]);
         setProducts(newData);
     };
 
@@ -69,7 +72,18 @@ const TableDetail = ({ route, navigation }) => {
 
         getRequest("product/getProductsByCategory?categoryId="+ e.id,(responseData)=>{
             if(responseData.status === 200){
-                const newData = responseData.result.map(item=>{return {...item,quantity:0}});
+
+
+                const newData = responseData.result.map(item=>{
+                    const newQuantity = selectedProducts.filter(row=>row.id===item.id && row.quantity>0);
+                    if(newQuantity.length>0){
+                        return {...item,quantity:newQuantity[0].quantity}    
+                    }
+                    else{
+                        return {...item,quantity:0}
+                    }
+                    
+                });
                 setProducts(newData);
             }
             else{
@@ -79,12 +93,13 @@ const TableDetail = ({ route, navigation }) => {
     }
 
     const handleAddButton = async()=>{
-        let data = products.filter(x=>x.quantity !=0);
-        data = data.map(row=>{
-            return {...row,totalPrice:row.quantity*row.price};
-        })
-        setOrders(data);
-        setModalVisible(false);
+        // let data = products.filter(x=>x.quantity !=0);
+        // data = data.map(row=>{
+        //     return {...row,totalPrice:row.quantity*row.price};
+        // })
+        // setOrders(data);
+        // setModalVisible(false);
+        console.log(selectedProducts)
     }
 
     const renderProductItem = ({ item }) => (
