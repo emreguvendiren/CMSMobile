@@ -125,6 +125,8 @@ const TableDetail = ({ route, navigation }) => {
         })
         setOrders(data);
         setModalVisible(false);
+
+        //deneme
         // const newData = {
         //     id:null,
         //     quantity:null
