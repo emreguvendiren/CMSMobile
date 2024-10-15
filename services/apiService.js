@@ -38,7 +38,7 @@ export const postRequest = async (path, data,callback) => {
        method:'POST',
        
        headers: {
-         Authorization: token ,"Content-Type": "application/json"
+         Authorization: "Bearer "+token ,"Content-Type": "application/json"
         },
        mode: 'no-cors',
        body:JSON.stringify(data)

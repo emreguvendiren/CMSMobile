@@ -37,10 +37,10 @@ function TabNavigator() {
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      <Tab.Screen name="Ana Sayfa" component={Home} />
-      <Tab.Screen name="Masalar" component={Tables} />
-      <Tab.Screen name="Menu" component={Menu} />
-      <Tab.Screen name="Profilim" component={Home} />
+      <Tab.Screen name="Ana Sayfa" component={Home}options={{ headerShown: false }}/>
+      <Tab.Screen name="Masalar" component={Tables} options={{ headerShown: false }}/>
+      <Tab.Screen name="Menu" component={Menu} options={{ headerShown: false }} />
+      <Tab.Screen name="Profilim" component={Home} options={{ headerShown: false }}/>
     </Tab.Navigator>
   );
 }
@@ -48,13 +48,16 @@ function TabNavigator() {
 function App(): React.JSX.Element {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator
+        initialRouteName="Login"
+        
+      >
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="TableDetail" component={TableDetail} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
-    
+
   );
 }
 

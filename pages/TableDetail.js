@@ -3,7 +3,7 @@ import { Dimensions, FlatList, Image, Modal, ToastAndroid, TouchableOpacity } fr
 import { View, Text, StyleSheet, Button, TouchableHighlight } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getRequest, postRequest } from '../services/apiService';
-import { Card, DataTable, Paragraph, Title } from 'react-native-paper';
+import { ActivityIndicator, Card, DataTable, Paragraph, Title } from 'react-native-paper';
 import { Typography } from '@mui/material';
 import { useScrollToTop } from '@react-navigation/native';
 
@@ -15,64 +15,67 @@ const windowWidth = Dimensions.get('window').width;
 const TableDetail = ({ route, navigation }) => {
 
     const defaultValue = {
-        tableId:null,
-        productId:null,
-        totalPrice:null,
-        quantity:null
+        tableId: null,
+        productId: null,
+        totalPrice: null,
+        quantity: null
     }
 
     const { tableId } = route.params;
+    const { tableName } = route.params;
     const [modalVisible, setModalVisible] = useState(false);
-    const [products,setProducts] = useState([]);
+    const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [selectedCategory,setSelectedCategory] = useState();
-    const [orders,setOrders] = useState([]);
-    const [selectedProducts,setSelectedProducts] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState();
+    const [orders, setOrders] = useState([]);
+    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isEnabled, setIsEnabled] = useState(true);
 
-    const increment =(item)=>{
-        
-        const newData = products.map(row=>{
-            if(row.id===item.id){
-                return {...row,quantity:row.quantity+1};
+    const increment = (item) => {
+
+        const newData = products.map(row => {
+            if (row.id === item.id) {
+                return { ...row, quantity: row.quantity + 1 };
             }
             return row;
         })
-        
-        const hasItem  = selectedProducts.findIndex(row=>row.id===item.id);
 
-        if(hasItem>-1){
-            const newProduct = selectedProducts.map(rowItem=>{
-                if(rowItem.id==item.id){
-                    return {...rowItem,quantity:item.quantity+1}
+        const hasItem = selectedProducts.findIndex(row => row.id === item.id);
+
+        if (hasItem > -1) {
+            const newProduct = selectedProducts.map(rowItem => {
+                if (rowItem.id == item.id) {
+                    return { ...rowItem, quantity: item.quantity + 1 }
                 }
                 return rowItem;
 
             })
             setSelectedProducts(newProduct);
         }
-        else{
-            
-            const newItem = {...item,quantity:1};
-            setSelectedProducts([...selectedProducts,newItem])
+        else {
+
+            const newItem = { ...item, quantity: 1 };
+            setSelectedProducts([...selectedProducts, newItem])
         }
 
         setProducts(newData);
     };
 
-    const decrement =(item)=>{
-        
-        const newData = products.map(row=>{
-            if(row.id===item.id){
-                if(item.quantity>0){
-                    return {...row,quantity:row.quantity-1};
+    const decrement = (item) => {
+
+        const newData = products.map(row => {
+            if (row.id === item.id) {
+                if (item.quantity > 0) {
+                    return { ...row, quantity: row.quantity - 1 };
                 }
             }
             return row;
         })
-        const newProduct = selectedProducts.map(rowItem=>{
-            if(rowItem.id==item.id){
-                if(item.quantity>0){
-                    return {...rowItem,quantity:item.quantity-1}
+        const newProduct = selectedProducts.map(rowItem => {
+            if (rowItem.id == item.id) {
+                if (item.quantity > 0) {
+                    return { ...rowItem, quantity: item.quantity - 1 }
                 }
             }
             return rowItem;
@@ -82,76 +85,81 @@ const TableDetail = ({ route, navigation }) => {
         setProducts(newData);
     };
 
-    
 
-    const handleAddProduct = async()=>{
+
+    const handleAddProduct = async () => {
         setModalVisible(true)
     }
 
-    useEffect(()=>{
-        getRequest("category/getAllCategory",(responseData)=>{
-            if(responseData.status===200){
+    useEffect(() => {
+        getRequest("category/getAllCategory", (responseData) => {
+            if (responseData.status === 200) {
 
                 setCategories(responseData.result);
                 setSelectedCategory(responseData.result[0])
                 getProductByCategory(responseData.result[0])
-                
+
             }
         });
-    },[]);
+    }, []);
 
-    const getProductByCategory =async (e) =>{
-
+    const getProductByCategory = async (e) => {
+        setIsLoading(true);
+        setIsEnabled(false);
+        setProducts([]);
         setSelectedCategory(e)
 
-        getRequest("product/getProductsByCategory?categoryId="+ e.id,(responseData)=>{
-            if(responseData.status === 200){
+        getRequest("product/getProductsByCategory?categoryId=" + e.id, (responseData) => {
+            if (responseData.status === 200) {
 
 
-                const newData = responseData.result.map(item=>{
-                    const newQuantity = selectedProducts.filter(row=>row.id===item.id && row.quantity>0);
-                    if(newQuantity.length>0){
-                        return {...item,quantity:newQuantity[0].quantity}    
+                const newData = responseData.result.map(item => {
+                    const newQuantity = selectedProducts.filter(row => row.id === item.id && row.quantity > 0);
+                    if (newQuantity.length > 0) {
+                        return { ...item, quantity: newQuantity[0].quantity }
                     }
-                    else{
-                        return {...item,quantity:0}
+                    else {
+                        return { ...item, quantity: 0 }
                     }
-                    
+
                 });
                 setProducts(newData);
+                setIsLoading(false);
+                setIsEnabled(true);
             }
-            else{
+            else {
                 setProducts([])
+                setIsEnabled(true);
             }
         })
     }
 
-    const handleAddOrder = async()=>{
-        if(orders.length===0){
-            ToastAndroid.show("Lutfen Urun Ekleyiniz",ToastAndroid.LONG)
+    const handleAddOrder = async () => {
+        if (orders.length === 0) {
+            ToastAndroid.show("Lutfen Urun Ekleyiniz", ToastAndroid.LONG)
         }
-        else{
+        else {
             const data = []
-            orders.map(item=>{
-                data.push( {...defaultValue,totalPrice:item.totalPrice,quantity:item.quantity,tableId:tableId,productId:item.id});
+            orders.map(item => {
+                data.push({ ...defaultValue, totalPrice: item.totalPrice, quantity: item.quantity, tableId: tableId, productId: item.id });
             })
             console.log(data)
-            postRequest("orders/create",data,(responseData)=>{
-                if(responseData.status===200){
+            postRequest("orders/create", data, (responseData) => {
+                if (responseData.status === 200) {
 
                 }
-                else{
-                    
+                else {
+
                 }
-                ToastAndroid.show(responseData.message,ToastAndroid.LONG)
+                ToastAndroid.show(responseData.message, ToastAndroid.LONG)
             })
         }
     }
 
-    const handleAddButton = async()=>{
-        let data = selectedProducts.filter(x=>x.quantity !=0);
-        data = data.map(row=>{
-            return {...row,totalPrice:row.quantity*row.price};
+    const handleAddButton = async () => {
+        let data = selectedProducts.filter(x => x.quantity != 0);
+        data = data.map(row => {
+            return { ...row, totalPrice: row.quantity * row.price };
         })
         setOrders(data);
         setModalVisible(false);
@@ -172,7 +180,7 @@ const TableDetail = ({ route, navigation }) => {
             <Card.Content style={styles.contentStyle}>
                 <Image
                     source={{ uri: item.imageUrl }}
-                    style={{ width: 80, height: 80,borderRadius:20 }}
+                    style={{ width: 80, height: 80, borderRadius: 20 }}
                     resizeMode={"cover"}
                 />
                 <View style={styles.textContainer}>
@@ -182,13 +190,13 @@ const TableDetail = ({ route, navigation }) => {
                 </View>
 
                 <View style={styles.containerDecInc}>
-                    <TouchableOpacity onPress={()=>{increment(item)}} style={styles.buttonDecInc}>
+                    <TouchableOpacity onPress={() => { increment(item) }} style={styles.buttonDecInc}>
                         <Icon name="plus-thick" size={23} color={'orange'} />
                     </TouchableOpacity>
                     <View style={styles.countContainer}>
                         <Text style={styles.countText}>{item.quantity}</Text>
                     </View>
-                    <TouchableOpacity onPress={()=>{decrement(item)}} style={styles.buttonDecInc}>
+                    <TouchableOpacity onPress={() => { decrement(item) }} style={styles.buttonDecInc}>
                         <Icon name="minus-thick" size={23} color={'orange'} />
                     </TouchableOpacity>
                 </View>
@@ -198,40 +206,40 @@ const TableDetail = ({ route, navigation }) => {
     );
 
     return (
-        <View style={{flex:1}}>
+        <View style={{ flex: 1 }}>
             <View style={styles.container}>
-            <Text style={styles.title}>Masa ID: {tableId}</Text>
-            {
-            <DataTable >
-            <DataTable.Header>
-                <DataTable.Title>Ürün Adı</DataTable.Title>
-                <DataTable.Title>Fiyat</DataTable.Title>
-                <DataTable.Title>Adet</DataTable.Title>
-                <DataTable.Title>Toplam Fiyat</DataTable.Title>
-            </DataTable.Header>
-            {
-                orders.length>0&&
-                    orders.map((item) => (
-                        <DataTable.Row key={item.id}>
-                            <DataTable.Cell>{item.name}</DataTable.Cell>
-                            <DataTable.Cell>{item.price}</DataTable.Cell>
-                            <DataTable.Cell >{item.quantity}</DataTable.Cell>
-                            <DataTable.Cell >{item.totalPrice}</DataTable.Cell>
-                        </DataTable.Row>
-                    ))
-            }
+                <Text style={styles.title}>Masa : {tableName}</Text>
+                {
+                    <DataTable >
+                        <DataTable.Header>
+                            <DataTable.Title>Ürün Adı</DataTable.Title>
+                            <DataTable.Title>Fiyat</DataTable.Title>
+                            <DataTable.Title>Adet</DataTable.Title>
+                            <DataTable.Title>Toplam Fiyat</DataTable.Title>
+                        </DataTable.Header>
+                        {
+                            orders.length > 0 &&
+                            orders.map((item) => (
+                                <DataTable.Row key={item.id}>
+                                    <DataTable.Cell>{item.name}</DataTable.Cell>
+                                    <DataTable.Cell>{item.price}</DataTable.Cell>
+                                    <DataTable.Cell >{item.quantity}</DataTable.Cell>
+                                    <DataTable.Cell >{item.totalPrice}</DataTable.Cell>
+                                </DataTable.Row>
+                            ))
+                        }
 
-        </DataTable>
-        }
+                    </DataTable>
+                }
 
-        <View>
-        <TouchableOpacity style={styles.addNewOrder} onPress={handleAddOrder}>
-                            <Text style={styles.closeButtonText}>Siparis Olustur</Text>
-                        </TouchableOpacity>
-        </View>
+                <View>
+                    <TouchableOpacity style={styles.addNewOrder} onPress={handleAddOrder}>
+                        <Text style={styles.closeButtonText}>Siparis Olustur</Text>
+                    </TouchableOpacity>
+                </View>
 
-        </View>
-        
+            </View>
+
 
             <TouchableOpacity onPress={handleAddProduct} style={styles.addProduct}>
                 <Icon name="order-bool-ascending" size={28} color={'red'} />
@@ -239,19 +247,20 @@ const TableDetail = ({ route, navigation }) => {
 
 
             <Modal
-               transparent={true}
-               visible={modalVisible}
-               animationType="slide"
-               onRequestClose={() => setModalVisible(false)}
-               >
-                   <View style={styles.modalContainer}>
+                transparent={true}
+                visible={modalVisible}
+                animationType="slide"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
                     <View style={styles.modalView}>
                         <View style={styles.menu}>
                             <FlatList
                                 horizontal
                                 data={categories}
+                                showsHorizontalScrollIndicator={false}
                                 renderItem={({ item }) => (
-                                    <TouchableOpacity onPress={() => getProductByCategory(item)}>
+                                    <TouchableOpacity onPress={() => getProductByCategory(item)} disabled={!isEnabled}>
                                         <Text style={[
                                             styles.menuItem,
                                             item === selectedCategory && styles.selectedMenuItem
@@ -261,10 +270,10 @@ const TableDetail = ({ route, navigation }) => {
                                 keyExtractor={(item) => item.id.toString()}
                             />
                         </View>
-                        <View style={{ marginTop: 15 ,flex:1}}>
+                        <View style={{ marginTop: 15, flex: 1 }}>
                             {
-                                products.length>0&&
-                                    <FlatList
+                                isLoading === false &&
+                                <FlatList
                                     data={products}
                                     renderItem={renderProductItem}
                                     keyExtractor={(item) => item.id.toString()}
@@ -272,8 +281,10 @@ const TableDetail = ({ route, navigation }) => {
                                 />
                             }
                             {
-                                products.length===0&&
-                                    <Text>Ürün Bulunamadı</Text>
+                                isLoading &&
+                                <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                                    <ActivityIndicator size="large" color="#C7B7A3" />
+                                </View>
                             }
                         </View>
                         <TouchableOpacity style={styles.closeButtonContainer} onPress={handleAddButton}>
@@ -291,12 +302,12 @@ const TableDetail = ({ route, navigation }) => {
     );
 };
 
-const cardWidth = windowWidth - 92; 
+const cardWidth = windowWidth - 92;
 const horizontalSpacing = 10;
 
 const styles = StyleSheet.create({
     container: {
-       // flex: 0.2,
+        // flex: 0.2,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -307,8 +318,8 @@ const styles = StyleSheet.create({
         padding: 5,
         borderWidth: 0.7,
         borderColor: '#ddd',
-        
-      },
+
+    },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -358,7 +369,7 @@ const styles = StyleSheet.create({
     },
     card: {
         width: cardWidth,
-        marginLeft:-3,
+        marginLeft: -3,
         marginVertical: 12,
         marginRight: horizontalSpacing,
         borderWidth: 1,
@@ -389,10 +400,10 @@ const styles = StyleSheet.create({
         marginTop: 2,
         fontSize: 12,
     },
-    description:{
+    description: {
         marginTop: 2,
         fontSize: 12,
-        paddingRight:40
+        paddingRight: 40
     },
     textContainer: {
         marginLeft: 15,
@@ -404,10 +415,10 @@ const styles = StyleSheet.create({
         borderBottomColor: '#FF6347',
     },
 
-  
+
 
     addNewOrder: {
-        
+
         width: '100%',
         paddingVertical: 7,
         alignItems: 'center',
@@ -430,7 +441,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FF6347',
     },
-    addProductToOrder:{
+    addProductToOrder: {
         position: 'absolute',
         bottom: 36,
         right: 10,
@@ -443,18 +454,18 @@ const styles = StyleSheet.create({
     },
     buttonDecInc: {
         padding: 3,
-      },
-      countContainer: {
+    },
+    countContainer: {
         marginHorizontal: 10,
         backgroundColor: '#ffecd2',
         borderRadius: 20,
         paddingVertical: 2,
         paddingHorizontal: 3,
-      },
-      countText: {
+    },
+    countText: {
         fontSize: 14,
         color: 'orange',
         textAlign: 'center',
-      }
+    }
 });
 export default TableDetail;

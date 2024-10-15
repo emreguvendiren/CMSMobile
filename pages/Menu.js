@@ -1,8 +1,9 @@
 import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { Dimensions, FlatList, StyleSheet, View, Image, TouchableOpacity } from "react-native";
-import { Card, Paragraph, Text, Title } from "react-native-paper";
+import { ActivityIndicator, Card, Paragraph, Text, Title } from "react-native-paper";
 import { getRequest } from "../services/apiService";
+import { setEnabled } from "react-native/Libraries/Performance/Systrace";
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -11,6 +12,8 @@ const Menu = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState();
+    const [isLoading, setIsLoading] = useState(false);
+    const [isEnabled, setIsEnabled] = useState(true);
 
     useEffect(() => {
         getRequest("category/getAllCategory", (responseData) => {
@@ -23,11 +26,19 @@ const Menu = () => {
     }, [isFocused]);
 
     const getProductByCategory = async (category) => {
+        setIsLoading(true);
+        setIsEnabled(false);
+        setProducts([]);
         setSelectedCategory(category);
 
         getRequest("product/getProductsByCategory?categoryId=" + category.id, (responseData) => {
             if (responseData.status === 200) {
                 setProducts(responseData.result);
+                setIsLoading(false);
+                setIsEnabled(true);
+            }
+            else{
+                setIsEnabled(true);
             }
         });
     };
@@ -55,8 +66,9 @@ const Menu = () => {
                 <FlatList
                     horizontal
                     data={categories}
+                    showsHorizontalScrollIndicator={false}
                     renderItem={({ item }) => (
-                        <TouchableOpacity key={item.id} onPress={() => getProductByCategory(item)}>
+                        <TouchableOpacity key={item.id} onPress={() => getProductByCategory(item)} disabled={!isEnabled}>
                             <Text style={[
                                 styles.menuItem,
                                 item === selectedCategory && styles.selectedMenuItem
@@ -66,14 +78,25 @@ const Menu = () => {
                     keyExtractor={(item) => item.id.toString()}
                 />
             </View>
-            <View style={{ marginTop: 15 }}>
-                <FlatList
-                    data={products}
-                    renderItem={renderProductItem}
-                    keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={styles.list}
-                />
-            </View>
+            {isLoading &&
+                <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' ,flex:1}}>
+                    <ActivityIndicator size="large" color="#C7B7A3" />
+                </View>
+
+            }
+
+            {
+                isLoading === false &&
+                <View style={{ marginTop: 15 }}>
+                    <FlatList
+                        data={products}
+                        renderItem={renderProductItem}
+                        keyExtractor={(item) => item.id.toString()}
+                        contentContainerStyle={styles.list}
+                    />
+                </View>
+            }
+
         </View>
     );
 };

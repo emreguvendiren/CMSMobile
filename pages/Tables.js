@@ -28,7 +28,7 @@ const Tables = () => {
     const handleTableClick = (table) => {
         //setSelectedTable(table);
         //setModalVisible(true);
-        navigation.navigate('TableDetail',{tableId:table.id})
+        navigation.navigate('TableDetail',{tableId:table.id,tableName:table.tableName})
     };
 
     const renderTableItem = ({ item }) => (
@@ -50,6 +50,7 @@ const Tables = () => {
                 keyExtractor={(item) => item.id.toString()}
                 numColumns={3}
                 contentContainerStyle={styles.list}
+                showsVerticalScrollIndicator={false}
               
             />
 
