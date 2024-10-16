@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Button,
   StyleSheet,
   Text,
   TextInput,
   View,
-  ImageBackground
+  ImageBackground,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ToastAndroid } from 'react-native';
+import {ToastAndroid} from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
-import { Int32 } from 'react-native/Libraries/Types/CodegenTypes';
-import { postRequestWithoutToken } from '../services/apiService';
-
+import {useNavigation} from '@react-navigation/native';
+import {Int32} from 'react-native/Libraries/Types/CodegenTypes';
+import {postRequestWithoutToken} from '../services/apiService';
 
 const styles = StyleSheet.create({
   background: {
@@ -52,21 +51,24 @@ const styles = StyleSheet.create({
 });
 
 const LoginScreen = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('emrebaba');
+  const [password, setPassword] = useState('furkanbaba');
   const navigation = useNavigation();
 
   const handleLogin = async () => {
-    if (username === "" && password === "") {
-      ToastAndroid.show("Lütfen kullanıcı adı ve şifre alanlarını giriniz", ToastAndroid.LONG);
+    if (username === '' && password === '') {
+      ToastAndroid.show(
+        'Lütfen kullanıcı adı ve şifre alanlarını giriniz',
+        ToastAndroid.LONG,
+      );
     } else {
       const user = {
         username: username,
-        password: password
+        password: password,
       };
-      postRequestWithoutToken("auth/signin", user, (responseData) => {
+      postRequestWithoutToken('auth/signin', user, responseData => {
         if (responseData.status === 200) {
-          AsyncStorage.setItem("Token", responseData.result);
+          AsyncStorage.setItem('Token', responseData.result);
           navigation.navigate('Home');
         } else {
           ToastAndroid.show(responseData.message, ToastAndroid.LONG);
@@ -78,13 +80,12 @@ const LoginScreen = () => {
   return (
     <ImageBackground
       source={require('../assets/bg.jpg')}
-      style={styles.background}
-    >
+      style={styles.background}>
       <View style={styles.container}>
         <Text style={styles.title}>Coffee Management System</Text>
         <View style={styles.inputContainer}>
           <TextInput
-            placeholder='Kullanıcı Adı'
+            placeholder="Kullanıcı Adı"
             value={username}
             onChangeText={setUsername}
             style={styles.input}
@@ -92,7 +93,7 @@ const LoginScreen = () => {
         </View>
         <View style={styles.inputContainer}>
           <TextInput
-            placeholder='Şifre'
+            placeholder="Şifre"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -100,11 +101,11 @@ const LoginScreen = () => {
           />
         </View>
         <View style={styles.buttonContainer}>
-          <Button title='Giriş Yap' color='#796a41' onPress={handleLogin} />
+          <Button title="Giriş Yap" color="#796a41" onPress={handleLogin} />
         </View>
       </View>
     </ImageBackground>
   );
-}
+};
 
 export default LoginScreen;
