@@ -30,7 +30,7 @@ const Tables = () => {
     getRequest(
       'table/getAllTableWithPrice',
       responseData => {
-        console.log(responseData.result);
+        //console.log(responseData.result);
 
         setTables(responseData.result);
       },
